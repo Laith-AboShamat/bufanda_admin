@@ -27,7 +27,7 @@ export default async function Home() {
             <CircleDollarSign className="max-sm:hidden" />
           </CardHeader>
           <CardContent>
-            <p className="text-body-bold">$ {totalRevenue}</p>
+            <p className="text-body-bold">₪ {totalRevenue}</p>
           </CardContent>
         </Card>
 
