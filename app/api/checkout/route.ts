@@ -17,25 +17,19 @@ export async function POST(req: NextRequest) {
   try {
     const { cartItems, customer, shippingAddress } = await req.json();
 
-    // Validate required fields
     if (!cartItems || !customer || !shippingAddress) {
       return new NextResponse("Not enough data to checkout", { status: 400 });
     }
 
-    // Validate shipping address fields
     if (
       !shippingAddress.street ||
-      !shippingAddress.city ||
-      !shippingAddress.state ||
-      !shippingAddress.postalCode ||
-      !shippingAddress.country
+      !shippingAddress.city
     ) {
       return new NextResponse("Please provide a complete shipping address", { status: 400 });
     }
 
     await connectToDB();
 
-    // Map cart items to order items
     const orderItems = cartItems.map((cartItem: any) => ({
       product: cartItem.item._id,
       color: cartItem.color || "N/A",
@@ -43,32 +37,25 @@ export async function POST(req: NextRequest) {
       quantity: cartItem.quantity,
     }));
 
-    // Calculate total amount
     const totalAmount = cartItems.reduce(
       (acc: number, cartItem: any) => acc + cartItem.item.price * cartItem.quantity,
       0
     );
 
-    // Create a new order
     const newOrder = new Order({
       customerClerkId: customer.clerkId,
       products: orderItems,
       shippingAddress: {
         street: shippingAddress.street,
         city: shippingAddress.city,
-        state: shippingAddress.state,
-        postalCode: shippingAddress.postalCode,
-        country: shippingAddress.country,
       },
-      shippingRate: "N/A", // You can update this if you have shipping rates
+      shippingRate: "N/A",
       totalAmount,
-      status: "Pending", // Default status
+      status: "Pending",
     });
 
-    // Save the new order
     await newOrder.save();
 
-    // Update or create the customer record
     let customerRecord = await Customer.findOne({ clerkId: customer.clerkId });
 
     if (customerRecord) {
@@ -84,7 +71,6 @@ export async function POST(req: NextRequest) {
 
     await customerRecord.save();
 
-    // Return the order ID in the response
     return NextResponse.json({ orderId: newOrder._id }, { headers: corsHeaders });
   } catch (err) {
     console.log("[checkout_POST]", err);
