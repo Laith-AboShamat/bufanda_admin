@@ -22,6 +22,10 @@ const orderSchema = new mongoose.Schema({
   },
   shippingRate: String,
   totalAmount: Number,
+  status: {
+    type: String,
+    default: "Pending",
+  },
   createdAt: {
     type: Date,
     default: Date.now,
