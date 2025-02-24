@@ -21,7 +21,7 @@ export default async function Home() {
       <Separator className="bg-grey-1 my-5" />
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-10">
-        <Card>
+        <Card className="shadow-sm hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row justify-between items-center">
             <CardTitle>Total Revenue</CardTitle>
             <CircleDollarSign className="max-sm:hidden" />
@@ -31,7 +31,7 @@ export default async function Home() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="shadow-sm hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row justify-between items-center">
             <CardTitle>Total Orders</CardTitle>
             <ShoppingBag className="max-sm:hidden" />
@@ -41,7 +41,7 @@ export default async function Home() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="shadow-sm hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row justify-between items-center">
             <CardTitle>Total Customer</CardTitle>
             <UserRound className="max-sm:hidden" />
@@ -52,7 +52,7 @@ export default async function Home() {
         </Card>
       </div>
 
-      <Card className="mt-10">
+      <Card className="mt-10 shadow-sm hover:shadow-md transition-shadow">
         <CardHeader>
           <CardTitle>Sales Chart ($)</CardTitle>
         </CardHeader>
