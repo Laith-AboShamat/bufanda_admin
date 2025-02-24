@@ -11,9 +11,11 @@ const ProductSchema = new mongoose.Schema({
   colors: [String],
   price: { type: mongoose.Schema.Types.Decimal128, get: (v: mongoose.Schema.Types.Decimal128) => { return parseFloat(v.toString()) }},
   expense: { type: mongoose.Schema.Types.Decimal128, get: (v: mongoose.Schema.Types.Decimal128) => { return parseFloat(v.toString()) }},
+  material: [String], // Change this to an array
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 }, { toJSON: { getters: true } });
+  
 
 const Product = mongoose.models.Product || mongoose.model("Product", ProductSchema);
 

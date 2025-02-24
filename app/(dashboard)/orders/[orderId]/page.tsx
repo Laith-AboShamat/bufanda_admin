@@ -38,7 +38,9 @@ const OrderDetails = async ({ params }: { params: { orderId: string } }) => {
             <div className="space-y-4">
               <div className="p-4 border rounded-lg shadow-sm hover:shadow-md transition-shadow">
                 <p className="text-sm text-gray-500">Order ID</p>
-                <p className="text-lg font-medium">{orderDetails._id}</p>
+                <p className="text-lg font-medium break-words max-w-full">
+                  {orderDetails._id}
+                </p>
               </div>
 
               <div className="p-4 border rounded-lg shadow-sm hover:shadow-md transition-shadow">

@@ -18,6 +18,7 @@ type ProductType = {
   colors: [string];
   price: number;
   expense: number;
+  material: [string];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -35,6 +36,7 @@ type OrderItemType = {
   color: string;
   size: string;
   quantity: number;
+  material: string;
 }
 
 type CustomerType = {

@@ -36,6 +36,7 @@ const formSchema = z.object({
   colors: z.array(z.string()),
   price: z.coerce.number().min(0.1),
   expense: z.coerce.number().min(0.1),
+  material: z.array(z.string()),
 });
 
 interface ProductFormProps {
@@ -86,6 +87,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData }) => {
           colors: [],
           price: 0.1,
           expense: 0.1,
+          material: [],
         },
   });
 
@@ -241,6 +243,32 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData }) => {
                       placeholder="Category"
                       {...field}
                       onKeyDown={handleKeyPress}
+                    />
+                  </FormControl>
+                  <FormMessage className="text-red-1" />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="material"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Material</FormLabel>
+                  <FormControl>
+                    <MultiText
+                      placeholder="Material"
+                      value={field.value}
+                      onChange={(material) =>
+                        field.onChange([...field.value, material])
+                      }
+                      onRemove={(materialToRemove) =>
+                        field.onChange([
+                          ...field.value.filter(
+                            (material) => material !== materialToRemove
+                          ),
+                        ])
+                      }
                     />
                   </FormControl>
                   <FormMessage className="text-red-1" />
