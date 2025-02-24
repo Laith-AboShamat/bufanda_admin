@@ -17,13 +17,16 @@ export async function POST(req: NextRequest) {
   try {
     const { cartItems, customer, shippingAddress } = await req.json();
 
+
     if (!cartItems || !customer || !shippingAddress) {
       return new NextResponse("Not enough data to checkout", { status: 400 });
     }
 
+
     if (
       !shippingAddress.street ||
-      !shippingAddress.city
+      !shippingAddress.city ||
+      !shippingAddress.phoneNumber
     ) {
       return new NextResponse("Please provide a complete shipping address", { status: 400 });
     }
@@ -37,6 +40,7 @@ export async function POST(req: NextRequest) {
       quantity: cartItem.quantity,
     }));
 
+
     const totalAmount = cartItems.reduce(
       (acc: number, cartItem: any) => acc + cartItem.item.price * cartItem.quantity,
       0
@@ -48,13 +52,16 @@ export async function POST(req: NextRequest) {
       shippingAddress: {
         street: shippingAddress.street,
         city: shippingAddress.city,
+        phoneNumber: shippingAddress.phoneNumber,
       },
       shippingRate: "N/A",
       totalAmount,
       status: "Pending",
     });
 
+
     await newOrder.save();
+
 
     let customerRecord = await Customer.findOne({ clerkId: customer.clerkId });
 
@@ -70,6 +77,7 @@ export async function POST(req: NextRequest) {
     }
 
     await customerRecord.save();
+
 
     return NextResponse.json({ orderId: newOrder._id }, { headers: corsHeaders });
   } catch (err) {
