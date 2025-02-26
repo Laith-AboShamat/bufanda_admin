@@ -4,9 +4,8 @@ import { connectToDB } from "@/lib/mongoDB";
 import Product from "@/lib/models/Product";
 import Collection from "@/lib/models/Collection";
 
-// CORS headers
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*", // Allow all origins (or specify your store URL, e.g., "http://localhost:3001")
+  "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
