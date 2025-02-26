@@ -1,9 +1,19 @@
 import { auth } from "@clerk/nextjs";
 import { NextRequest, NextResponse } from "next/server";
-
 import { connectToDB } from "@/lib/mongoDB";
 import Product from "@/lib/models/Product";
 import Collection from "@/lib/models/Collection";
+
+// CORS headers
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*", // Allow all origins (or specify your store URL, e.g., "http://localhost:3001")
+  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+};
+
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders });
+}
 
 export const POST = async (req: NextRequest) => {
   try {
@@ -29,7 +39,7 @@ export const POST = async (req: NextRequest) => {
       material,
     } = await req.json();
 
-    if (!title || !description || !media || !category || !price || !expense ||!material) {
+    if (!title || !description || !media || !category || !price || !expense || !material) {
       return new NextResponse("Not enough data to create a product", {
         status: 400,
       });
@@ -61,10 +71,10 @@ export const POST = async (req: NextRequest) => {
       }
     }
 
-    return NextResponse.json(newProduct, { status: 200 });
+    return NextResponse.json(newProduct, { status: 200, headers: corsHeaders });
   } catch (err) {
     console.log("[products_POST]", err);
-    return new NextResponse("Internal Error", { status: 500 });
+    return new NextResponse("Internal Error", { status: 500, headers: corsHeaders });
   }
 };
 
@@ -76,12 +86,11 @@ export const GET = async (req: NextRequest) => {
       .sort({ createdAt: "desc" })
       .populate({ path: "collections", model: Collection });
 
-    return NextResponse.json(products, { status: 200 });
+    return NextResponse.json(products, { status: 200, headers: corsHeaders });
   } catch (err) {
     console.log("[products_GET]", err);
-    return new NextResponse("Internal Error", { status: 500 });
+    return new NextResponse("Internal Error", { status: 500, headers: corsHeaders });
   }
 };
 
 export const dynamic = "force-dynamic";
-
