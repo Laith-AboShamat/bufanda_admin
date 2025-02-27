@@ -2,14 +2,9 @@
 
 import {
   Command,
-  CommandDialog,
-  CommandEmpty,
-  CommandGroup,
   CommandInput,
+  CommandGroup,
   CommandItem,
-  CommandList,
-  CommandSeparator,
-  CommandShortcut,
 } from "@/components/ui/command";
 import { useState } from "react";
 import { Badge } from "../ui/badge";
@@ -33,17 +28,13 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
   const [inputValue, setInputValue] = useState("");
   const [open, setOpen] = useState(false);
 
-  let selected: CollectionType[];
+  const selected = value.map((id) =>
+    collections.find((collection) => collection._id === id)
+  ) as CollectionType[];
 
-  if (value.length === 0) {
-    selected = [];
-  } else {
-    selected = value.map((id) =>
-      collections.find((collection) => collection._id === id)
-    ) as CollectionType[];
-  }
-
-  const selectables = collections.filter((collection) => !selected.includes(collection)); 
+  const selectables = collections.filter(
+    (collection) => !value.includes(collection._id)
+  );
 
   return (
     <Command className="overflow-visible bg-white">
@@ -51,7 +42,11 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
         {selected.map((collection) => (
           <Badge key={collection._id}>
             {collection.title}
-            <button type="button" className="ml-1 hover:text-red-1" onClick={() => onRemove(collection._id)}>
+            <button
+              type="button"
+              className="ml-1 hover:text-red-1"
+              onClick={() => onRemove(collection._id)}
+            >
               <X className="h-3 w-3" />
             </button>
           </Badge>
