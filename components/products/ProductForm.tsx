@@ -40,7 +40,7 @@ const formSchema = z.object({
 });
 
 interface ProductFormProps {
-  initialData?: ProductType | null; //Must have "?" to make it optional
+  initialData?: ProductType | null;
 }
 
 const ProductForm: React.FC<ProductFormProps> = ({ initialData }) => {
@@ -107,10 +107,19 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData }) => {
       const url = initialData
         ? `/api/products/${initialData._id}`
         : "/api/products";
+  
+      const payload = initialData
+        ? {
+            ...values,
+            collections: values.collections,
+          }
+        : values;
+  
       const res = await fetch(url, {
         method: "POST",
-        body: JSON.stringify(values),
+        body: JSON.stringify(payload),
       });
+  
       if (res.ok) {
         setLoading(false);
         toast.success(`Product ${initialData ? "updated" : "created"}`);

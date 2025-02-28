@@ -14,7 +14,10 @@ export async function OPTIONS() {
   return NextResponse.json({}, { headers: corsHeaders });
 }
 
-export const POST = async (req: NextRequest) => {
+export const POST = async (
+  req: NextRequest,
+  { params }: { params: { productId: string } }
+) => {
   try {
     const { userId } = auth();
 
@@ -24,12 +27,21 @@ export const POST = async (req: NextRequest) => {
 
     await connectToDB();
 
+    const product = await Product.findById(params.productId);
+
+    if (!product) {
+      return new NextResponse(
+        JSON.stringify({ message: "Product not found" }),
+        { status: 404 }
+      );
+    }
+
     const {
       title,
       description,
       media,
       category,
-      collections,
+      collections, // This field is optional
       tags,
       sizes,
       colors,
@@ -39,41 +51,60 @@ export const POST = async (req: NextRequest) => {
     } = await req.json();
 
     if (!title || !description || !media || !category || !price || !expense || !material) {
-      return new NextResponse("Not enough data to create a product", {
+      return new NextResponse("Not enough data to update the product", {
         status: 400,
       });
     }
 
-    const newProduct = await Product.create({
-      title,
-      description,
-      media,
-      category,
-      collections,
-      tags,
-      sizes,
-      colors,
-      price,
-      expense,
-      material,
-    });
+    // Only update collections if the `collections` field is provided and different
+    if (collections && JSON.stringify(collections) !== JSON.stringify(product.collections)) {
+      const addedCollections = collections.filter(
+        (collectionId: string) => !product.collections.includes(collectionId)
+      );
+      const removedCollections = product.collections.filter(
+        (collectionId: string) => !collections.includes(collectionId)
+      );
 
-    await newProduct.save();
-
-    if (collections) {
-      for (const collectionId of collections) {
-        const collection = await Collection.findById(collectionId);
-        if (collection) {
-          collection.products.push(newProduct._id);
-          await collection.save();
-        }
-      }
+      // Update collections
+      await Promise.all([
+        ...addedCollections.map((collectionId: string) =>
+          Collection.findByIdAndUpdate(collectionId, {
+            $push: { products: product._id },
+          })
+        ),
+        ...removedCollections.map((collectionId: string) =>
+          Collection.findByIdAndUpdate(collectionId, {
+            $pull: { products: product._id },
+          })
+        ),
+      ]);
     }
 
-    return NextResponse.json(newProduct, { status: 200, headers: corsHeaders });
+    // Update product
+    const updatedProduct = await Product.findByIdAndUpdate(
+      product._id,
+      {
+        title,
+        description,
+        media,
+        category,
+        collections: collections || product.collections,
+        tags,
+        sizes,
+        colors,
+        price,
+        expense,
+        material,
+      },
+      { new: true }
+    ).populate({ path: "collections", model: Collection });
+
+    await updatedProduct.save();
+
+    return NextResponse.json(updatedProduct, { status: 200 });
   } catch (err) {
-    console.log("[products_POST]", err);
-    return new NextResponse("Internal Error", { status: 500, headers: corsHeaders });
+    console.log("[productId_POST]", err);
+    return new NextResponse("Internal error", { status: 500 });
   }
 };
 
