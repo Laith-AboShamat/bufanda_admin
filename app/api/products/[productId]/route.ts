@@ -1,9 +1,18 @@
-import Collection from "@/lib/models/Collection";
-import Product from "@/lib/models/Product";
+import { NextRequest, NextResponse } from "next/server";
 import { connectToDB } from "@/lib/mongoDB";
+import Product from "@/lib/models/Product";
+import Collection from "@/lib/models/Collection";
 import { auth } from "@clerk/nextjs";
 
-import { NextRequest, NextResponse } from "next/server";
+const corsHeaders = {
+  "Access-Control-Allow-Origin": process.env.ECOMMERCE_STORE_URL || "http://localhost:3001",
+  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+};
+
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders });
+}
 
 export const GET = async (
   req: NextRequest,
@@ -20,20 +29,17 @@ export const GET = async (
     if (!product) {
       return new NextResponse(
         JSON.stringify({ message: "Product not found" }),
-        { status: 404 }
+        { status: 404, headers: corsHeaders }
       );
     }
+
     return new NextResponse(JSON.stringify(product), {
       status: 200,
-      headers: {
-        "Access-Control-Allow-Origin": `${process.env.ECOMMERCE_STORE_URL}`,
-        "Access-Control-Allow-Methods": "GET",
-        "Access-Control-Allow-Headers": "Content-Type",
-      },
+      headers: corsHeaders,
     });
   } catch (err) {
     console.log("[productId_GET]", err);
-    return new NextResponse("Internal error", { status: 500 });
+    return new NextResponse("Internal error", { status: 500, headers: corsHeaders });
   }
 };
 
@@ -70,11 +76,10 @@ export const POST = async (
       colors,
       price,
       expense,
-      material,
     } = await req.json();
 
-    if (!title || !description || !media || !category || !price || !expense || !material) {
-      return new NextResponse("Not enough data to create a new product", {
+    if (!title || !description || !media || !category || !price || !expense) {
+      return new NextResponse("Not enough data to update the product", {
         status: 400,
       });
     }
@@ -82,23 +87,16 @@ export const POST = async (
     const addedCollections = collections.filter(
       (collectionId: string) => !product.collections.includes(collectionId)
     );
-    // included in new data, but not included in the previous data
-
     const removedCollections = product.collections.filter(
       (collectionId: string) => !collections.includes(collectionId)
     );
-    // included in previous data, but not included in the new data
 
-    // Update collections
     await Promise.all([
-      // Update added collections with this product
       ...addedCollections.map((collectionId: string) =>
         Collection.findByIdAndUpdate(collectionId, {
           $push: { products: product._id },
         })
       ),
-
-      // Update removed collections without this product
       ...removedCollections.map((collectionId: string) =>
         Collection.findByIdAndUpdate(collectionId, {
           $pull: { products: product._id },
@@ -106,7 +104,6 @@ export const POST = async (
       ),
     ]);
 
-    // Update product
     const updatedProduct = await Product.findByIdAndUpdate(
       product._id,
       {
@@ -120,17 +117,16 @@ export const POST = async (
         colors,
         price,
         expense,
-        material,
       },
       { new: true }
     ).populate({ path: "collections", model: Collection });
 
     await updatedProduct.save();
 
-    return NextResponse.json(updatedProduct, { status: 200 });
+    return NextResponse.json(updatedProduct, { status: 200, headers: corsHeaders });
   } catch (err) {
     console.log("[productId_POST]", err);
-    return new NextResponse("Internal error", { status: 500 });
+    return new NextResponse("Internal error", { status: 500, headers: corsHeaders });
   }
 };
 
@@ -158,7 +154,6 @@ export const DELETE = async (
 
     await Product.findByIdAndDelete(product._id);
 
-    // Update collections
     await Promise.all(
       product.collections.map((collectionId: string) =>
         Collection.findByIdAndUpdate(collectionId, {
@@ -169,12 +164,12 @@ export const DELETE = async (
 
     return new NextResponse(JSON.stringify({ message: "Product deleted" }), {
       status: 200,
+      headers: corsHeaders,
     });
   } catch (err) {
     console.log("[productId_DELETE]", err);
-    return new NextResponse("Internal error", { status: 500 });
+    return new NextResponse("Internal error", { status: 500, headers: corsHeaders });
   }
 };
 
 export const dynamic = "force-dynamic";
-
