@@ -5,12 +5,11 @@ import Collection from "@/lib/models/Collection";
 
 // CORS headers
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*", // Allow all origins (or specify your frontend URL, e.g., "http://localhost:3001")
+  "Access-Control-Allow-Origin": "*", 
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
 
-// Handle CORS preflight requests
 export async function OPTIONS() {
   return NextResponse.json({}, { headers: corsHeaders });
 }
@@ -25,7 +24,7 @@ export const POST = async (req: NextRequest) => {
 
     await connectToDB();
 
-    const { title, description, image } = await req.json();
+    const { title, description, image, category } = await req.json();
 
     const existingCollection = await Collection.findOne({ title });
 
@@ -41,6 +40,7 @@ export const POST = async (req: NextRequest) => {
       title,
       description,
       image,
+      category,
     });
 
     await newCollection.save();

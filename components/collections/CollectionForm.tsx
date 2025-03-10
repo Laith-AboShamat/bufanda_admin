@@ -21,15 +21,17 @@ import ImageUpload from "../custom ui/ImageUpload";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import Delete from "../custom ui/Delete";
+import CategoryMultiSelect from "../custom ui/CategoryMultiSelect";
 
 const formSchema = z.object({
   title: z.string().min(2).max(20),
   description: z.string().min(2).max(500).trim(),
   image: z.string(),
+  category: z.array(z.string()),
 });
 
 interface CollectionFormProps {
-  initialData?: CollectionType | null; //Must have "?" to make it optional
+  initialData?: CollectionType | null;
 }
 
 const CollectionForm: React.FC<CollectionFormProps> = ({ initialData }) => {
@@ -45,15 +47,18 @@ const CollectionForm: React.FC<CollectionFormProps> = ({ initialData }) => {
           title: "",
           description: "",
           image: "",
+          category: [],
         },
   });
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement> | React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleKeyPress = (
+    e: React.KeyboardEvent<HTMLInputElement> | React.KeyboardEvent<HTMLTextAreaElement>
+  ) => {
     if (e.key === "Enter") {
       e.preventDefault();
     }
-  }
-  
+  };
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setLoading(true);
@@ -126,6 +131,28 @@ const CollectionForm: React.FC<CollectionFormProps> = ({ initialData }) => {
                     value={field.value ? [field.value] : []}
                     onChange={(url) => field.onChange(url)}
                     onRemove={() => field.onChange("")}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="category"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Category</FormLabel>
+                <FormControl>
+                  <CategoryMultiSelect
+                    placeholder="Select category"
+                    value={field.value}
+                    onChange={(category) => field.onChange([...field.value, category])}
+                    onRemove={(categoryToRemove) =>
+                      field.onChange([
+                        ...field.value.filter((category) => category !== categoryToRemove),
+                      ])
+                    }
                   />
                 </FormControl>
                 <FormMessage />
